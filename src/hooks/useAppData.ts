@@ -20,6 +20,9 @@ export function useAppData() {
     null,
   );
 
+  // Track previous sortBy to detect changes
+  const prevSortByRef = useRef<SortBy>("name");
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -141,15 +144,19 @@ export function useAppData() {
     if (filteredBranches.length > 0) {
       const needsSelection =
         !selectedBranch ||
-        !filteredBranches.find((b) => b.id === selectedBranch.id);
+        !filteredBranches.find((b) => b.id === selectedBranch.id) ||
+        prevSortByRef.current !== sortBy;
 
       if (needsSelection) {
         setSelectedBranch(filteredBranches[0]);
       }
+
+      // Update ref for next comparison
+      prevSortByRef.current = sortBy;
     } else {
       setSelectedBranch(null);
     }
-  }, [filteredBranches, selectedBranch]);
+  }, [filteredBranches, selectedBranch, sortBy]);
 
   return {
     // State

@@ -5,7 +5,15 @@ import type { BranchRawData, GraphqlResponse, BranchData, ApiError } from '../ty
 /**
  * GraphQL API endpoint
  */
-const ENDPOINT = 'https://cg.optimizely.com/content/v2?auth=iQEyR1jR1cBG5mnLQoRotCyNmKUgaO0DT5cRbJPKA3oZGGQo';
+const AUTH_KEY = import.meta.env.VITE_OPTIMIZELY_AUTH_KEY;
+
+if (!AUTH_KEY) {
+  throw new Error(
+    'Missing VITE_OPTIMIZELY_AUTH_KEY environment variable. Please add it to your .env file.'
+  );
+}
+
+const ENDPOINT = `https://cg.optimizely.com/content/v2?auth=${AUTH_KEY}`;
 
 /**
  * GraphQL query to fetch branches

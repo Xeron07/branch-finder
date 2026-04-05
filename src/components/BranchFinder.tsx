@@ -13,22 +13,18 @@ import { useAppData } from "../hooks/useAppData";
 // TYPES
 // ============================================================================
 
-interface BranchFinderProps {
-  HeroComponent: () => JSX.Element;
-}
-
 // ============================================================================
 // HERO COMPONENT
 // ============================================================================
 
 export const Hero = () => {
   return (
-    <div className='relative bg-gradient-to-br from-midnight via-midnight to-teal pt-28 pb-10 sm:pb-20 px-4'>
+    <div className='relative bg-gradient-to-br from-midnight via-midnight to-teal pt-20 pb-8 sm:pt-36 sm:pb-32 px-4'>
       <div className='max-w-4xl mx-auto text-center'>
         <p className='text-sage text-[12px] uppercase tracking-[4px] font-medium mb-3'>
           Brightstream Bank
         </p>
-        <h1 className='font-playfair text-4xl sm:text-5xl font-bold text-warmWhite leading-tight tracking-tight'>
+        <h1 className='font-playfair text-3xl sm:text-5xl font-bold text-warmWhite leading-tight tracking-tight'>
           Find Your Nearest <span className='text-gold'>Branch</span>
         </h1>
         <p className='text-cream/70 font-light text-base mt-3 max-w-md mx-auto'>
@@ -57,12 +53,12 @@ export const HeroWithSearch = ({
   locating,
 }: HeroWithSearchProps) => {
   return (
-    <div className='relative bg-gradient-to-br from-midnight via-midnight to-teal pt-28 pb-10 sm:pb-20 px-4'>
+    <div className='relative bg-gradient-to-br from-midnight via-midnight to-teal pt-20 pb-8 sm:pt-36 sm:pb-32 px-4'>
       <div className='max-w-4xl mx-auto text-center mb-6'>
         <p className='text-sage text-[12px] uppercase tracking-[4px] font-medium mb-3'>
           Brightstream Bank
         </p>
-        <h1 className='font-playfair text-4xl sm:text-5xl font-bold text-warmWhite leading-tight tracking-tight'>
+        <h1 className='font-playfair text-3xl sm:text-5xl font-bold text-warmWhite leading-tight tracking-tight'>
           Find Your Nearest <span className='text-gold'>Branch</span>
         </h1>
         <p className='text-cream/70 font-light text-base mt-3 max-w-md mx-auto'>
@@ -87,7 +83,7 @@ export const HeroWithSearch = ({
 // BRANCH FINDER COMPONENT
 // ============================================================================
 
-const BranchFinder = ({ HeroComponent }: BranchFinderProps) => {
+const BranchFinder = () => {
   const appData = useAppData();
 
   // --------------------------------------------------------------------------
@@ -152,7 +148,7 @@ const BranchFinder = ({ HeroComponent }: BranchFinderProps) => {
         />
       </div>
       <div className='hidden md:block'>
-        <HeroComponent />
+        <Hero />
       </div>
 
       {/* Global Error State */}
@@ -261,7 +257,7 @@ const BranchFinder = ({ HeroComponent }: BranchFinderProps) => {
                 )}
 
                 {/* Branch list */}
-                <div className='flex-1 px-4 pb-24 space-y-2 overflow-y-auto'>
+                <div className='flex-1 sm:px-4 pb-24 space-y-2 overflow-y-auto'>
                   {mobileListContent}
                 </div>
               </div>

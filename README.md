@@ -30,7 +30,23 @@ This will install all required dependencies including:
 - Leaflet.js (maps)
 - Axios (HTTP client)
 
-### 2. Start Development Server
+### 2. Configure Environment Variables
+
+Create a `.env` file in the project root with your Optimizely API key:
+
+```bash
+VITE_OPTIMIZELY_AUTH_KEY=your_optimizely_auth_key_here
+```
+
+You can use the `.env.example` file as a template:
+
+```bash
+cp .env.example .env
+```
+
+Then edit `.env` and add your actual API key.
+
+### 3. Start Development Server
 
 ```bash
 npm run dev
@@ -38,7 +54,7 @@ npm run dev
 
 The application will start at `http://localhost:3000` (or the next available port like 3001).
 
-### 3. Build for Production
+### 4. Build for Production
 
 ```bash
 npm run build
@@ -46,7 +62,7 @@ npm run build
 
 This creates an optimized production build in the `/dist` folder.
 
-### 4. Preview Production Build
+### 5. Preview Production Build
 
 ```bash
 npm run preview
@@ -54,7 +70,7 @@ npm run preview
 
 Preview the production build locally before deploying.
 
-### Deployment
+### 6. Deployment
 
 Deploy the `/dist` folder to any static hosting service:
 

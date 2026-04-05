@@ -43,7 +43,7 @@ export const createBranchPopup = (branch: Branch): string => {
     <div style="font-family:'Jost',sans-serif;min-width:160px">
       <div style="font-weight:600;font-size:14px;color:#0a1628;margin-bottom:4px">${branch.name}</div>
       <div style="font-size:12px;color:#64748b">${branch.address}</div>
-      <div style="font-size:12px;color:#64748b">${branch.city}</div>
+      <div style="font-size:12px;color:#64748b">${branch.city}, ${branch.country}</div>
     </div>
   `;
 };
