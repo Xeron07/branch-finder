@@ -1,6 +1,10 @@
-import { useEffect, useRef, useCallback } from 'react';
-import type { Branch, UserLocation } from '../types';
-import { initializeMap, createBranchMarker, createUserIcon } from '../utils/mapHelpers';
+import { useEffect, useRef, useCallback } from "react";
+import type { Branch, UserLocation } from "../types";
+import {
+  initializeMap,
+  createBranchMarker,
+  createUserIcon,
+} from "../utils/mapHelpers";
 
 // Extend Window interface to include Leaflet
 declare global {
@@ -20,7 +24,12 @@ interface MapViewProps {
 // MAP VIEW COMPONENT
 // ============================================================================
 
-const MapView = ({ branches, selectedBranch, onSelectBranch, userLocation }: MapViewProps) => {
+const MapView = ({
+  branches,
+  selectedBranch,
+  onSelectBranch,
+  userLocation,
+}: MapViewProps) => {
   // --------------------------------------------------------------------------
   // REFS
   // --------------------------------------------------------------------------
@@ -60,7 +69,12 @@ const MapView = ({ branches, selectedBranch, onSelectBranch, userLocation }: Map
     // Create new markers
     validBranches.forEach((branch) => {
       const isSelected = selectedBranch?.id === branch.id;
-      const marker = createBranchMarker(branch, isSelected, map, onSelectBranch);
+      const marker = createBranchMarker(
+        branch,
+        isSelected,
+        map,
+        onSelectBranch,
+      );
 
       if (marker) {
         // Pan to selected branch
@@ -90,7 +104,9 @@ const MapView = ({ branches, selectedBranch, onSelectBranch, userLocation }: Map
       // Find and open popup for the selected branch marker
       const marker = markersRef.current.find((m) => {
         const latLng = m.getLatLng();
-        return latLng.lat === selectedBranch.lat && latLng.lng === selectedBranch.lng;
+        return (
+          latLng.lat === selectedBranch.lat && latLng.lng === selectedBranch.lng
+        );
       });
 
       if (marker) {
@@ -98,7 +114,9 @@ const MapView = ({ branches, selectedBranch, onSelectBranch, userLocation }: Map
       }
 
       // Pan to the selected branch
-      map.setView([selectedBranch.lat, selectedBranch.lng], 14, { animate: true });
+      map.setView([selectedBranch.lat, selectedBranch.lng], 14, {
+        animate: true,
+      });
     }
   }, [selectedBranch]);
 
@@ -118,18 +136,23 @@ const MapView = ({ branches, selectedBranch, onSelectBranch, userLocation }: Map
     // Create and add new user marker
     const userIcon = createUserIcon();
     if (userIcon) {
-      userMarkerRef.current = window.L
-        .marker([userLocation.lat, userLocation.lng], {
+      userMarkerRef.current = window.L.marker(
+        [userLocation.lat, userLocation.lng],
+        {
           icon: userIcon,
           zIndexOffset: 1000,
-        })
+        },
+      )
         .addTo(map)
-        .bindPopup('You are here');
+        .bindPopup("You are here");
 
-      // Center map on user location
-      map.setView([userLocation.lat, userLocation.lng], 12, { animate: true });
+      // Only center map on user location if no branch is selected
+      // This prevents overriding the map center when a branch is auto-selected after geolocation
+      if (!selectedBranch) {
+        map.setView([userLocation.lat, userLocation.lng], 12, { animate: true });
+      }
     }
-  }, [userLocation]);
+  }, [userLocation, selectedBranch]);
 
   // --------------------------------------------------------------------------
   // EFFECTS
@@ -154,22 +177,22 @@ const MapView = ({ branches, selectedBranch, onSelectBranch, userLocation }: Map
   // RENDER
   // --------------------------------------------------------------------------
   return (
-    <div className="relative w-full h-full rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(10,22,40,0.12)]">
-      <div ref={mapRef} className="w-full h-full" />
+    <div className='relative w-full h-full rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(10,22,40,0.12)]'>
+      <div ref={mapRef} className='w-full h-full' />
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-md flex flex-col gap-1.5 z-[1000]">
-        <div className="flex items-center gap-2 text-[11px] text-slate">
-          <div className="w-3.5 h-3.5 bg-midnight border-2 border-gold rounded-full" />
+      <div className='absolute bottom-4 left-4 bg-white/90 backdrop-blur-sm rounded-xl px-3 py-2 shadow-md flex flex-col gap-1.5 z-[1000]'>
+        <div className='flex items-center gap-2 text-[11px] text-slate'>
+          <div className='w-3.5 h-3.5 bg-midnight border-2 border-gold rounded-full' />
           <span>Branch</span>
         </div>
-        <div className="flex items-center gap-2 text-[11px] text-slate">
-          <div className="w-3.5 h-3.5 bg-gold border-2 border-midnight rounded-full" />
+        <div className='flex items-center gap-2 text-[11px] text-slate'>
+          <div className='w-3.5 h-3.5 bg-gold border-2 border-midnight rounded-full' />
           <span>Selected</span>
         </div>
         {userLocation && (
-          <div className="flex items-center gap-2 text-[11px] text-slate">
-            <div className="w-3.5 h-3.5 bg-teal border-2 border-white rounded-full" />
+          <div className='flex items-center gap-2 text-[11px] text-slate'>
+            <div className='w-3.5 h-3.5 bg-teal border-2 border-white rounded-full' />
             <span>You</span>
           </div>
         )}

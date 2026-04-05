@@ -14,14 +14,12 @@ export function useAppData() {
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locating, setLocating] = useState<boolean>(false);
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
-  const [mobileTab, setMobileTab] = useState<"list" | "map">("list");
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState<boolean>(false);
-  const [mobileDrawerBranch, setMobileDrawerBranch] = useState<Branch | null>(
-    null,
-  );
 
-  // Track previous sortBy to detect changes
   const prevSortByRef = useRef<SortBy>("name");
+  const mobileDrawerBranchRef = useRef<Branch | null>(null);
+
+  // ── Data fetching ─────────────────────────────────────────────────────────
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -40,7 +38,9 @@ export function useAppData() {
     load();
   }, [load]);
 
-  const handleGeolocate = useCallback(() => {
+  // ── Geolocation ───────────────────────────────────────────────────────────
+
+  const handleGeolocate = () => {
     if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -55,27 +55,47 @@ export function useAppData() {
       () => setLocating(false),
       { timeout: 10000 },
     );
-  }, [setSortBy]);
+  };
 
-  const handleCityToggle = useCallback((city: string) => {
+  // ── Filter actions ────────────────────────────────────────────────────────
+
+  const handleCityToggle = (city: string) => {
     setActiveCities((prev) =>
       prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city],
     );
-  }, []);
+  };
 
-  const handleCountryToggle = useCallback((country: string) => {
+  const handleCountryToggle = (country: string) => {
     setActiveCountries((prev) =>
       prev.includes(country)
         ? prev.filter((c) => c !== country)
         : [...prev, country],
     );
-  }, []);
+  };
+
+  const clearAll = () => {
+    setQuery("");
+    setActiveCities([]);
+    setActiveCountries([]);
+  };
+
+  // ── Drawer ────────────────────────────────────────────────────────────────
+
+  const handleOpenDrawer = (branch: Branch) => {
+    mobileDrawerBranchRef.current = branch;
+    setSelectedBranch(branch);
+    setMobileDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => setMobileDrawerOpen(false);
+
+  const handleMobileMapSelect = (b: Branch) => setSelectedBranch(b);
+
+  // ── Derived data ──────────────────────────────────────────────────────────
 
   const filteredBranches = useMemo(() => {
-    // Filter by search query using client-side filter
     let result = filterBranches(branches, query);
 
-    // Calculate distances for all filtered branches
     result = result.map((b) => ({
       ...b,
       distance:
@@ -84,82 +104,74 @@ export function useAppData() {
           : null,
     }));
 
-    // Apply city filters
     if (activeCities.length > 0) {
       result = result.filter((b) => activeCities.includes(b.city));
     }
 
-    // Apply country filters
     if (activeCountries.length > 0) {
       result = result.filter((b) => activeCountries.includes(b.country));
     }
 
-    // Apply sorting
     result.sort((a, b) => {
-      if (sortBy === "distance" && a.distance != null && b.distance != null)
+      if (sortBy === "distance" && a.distance != null && b.distance != null) {
         return a.distance - b.distance;
-      if (sortBy === "city") {
-        const comparison = (a.city || "").localeCompare(b.city || "");
-        return sortDescending ? -comparison : comparison;
       }
-      const comparison = (a.name || "").localeCompare(b.name || "");
-      return sortDescending ? -comparison : comparison;
+      if (sortBy === "city") {
+        const cmp = (a.city || "").localeCompare(b.city || "");
+        return sortDescending ? -cmp : cmp;
+      }
+      const cmp = (a.name || "").localeCompare(b.name || "");
+      return sortDescending ? -cmp : cmp;
     });
 
     return result;
-  }, [branches, query, activeCities, activeCountries, sortBy, sortDescending, userLocation]);
+  }, [
+    branches,
+    query,
+    activeCities,
+    activeCountries,
+    sortBy,
+    sortDescending,
+    userLocation,
+  ]);
 
-  const uniqueCities = useMemo(() => {
-    const cities = new Set(branches.map((b) => b.city).filter(Boolean));
-    return Array.from(cities).sort();
-  }, [branches]);
+  const uniqueCities = useMemo(
+    () =>
+      Array.from(new Set(branches.map((b) => b.city).filter(Boolean))).sort(),
+    [branches],
+  );
 
-  const uniqueCountries = useMemo(() => {
-    const countries = new Set(branches.map((b) => b.country).filter(Boolean));
-    return Array.from(countries).sort();
-  }, [branches]);
+  const uniqueCountries = useMemo(
+    () =>
+      Array.from(
+        new Set(branches.map((b) => b.country).filter(Boolean)),
+      ).sort(),
+    [branches],
+  );
 
-  const clearAll = useCallback(() => {
-    setQuery("");
-    setActiveCities([]);
-    setActiveCountries([]);
-  }, []);
+  // ── Auto-select first branch ──────────────────────────────────────────────
 
-  const handleMobileMapSelect = useCallback((b: Branch) => {
-    setSelectedBranch(b);
-  }, []);
-
-  const handleOpenDrawer = useCallback((branch: Branch) => {
-    setMobileDrawerBranch(branch);
-    setSelectedBranch(branch);
-    setMobileDrawerOpen(true);
-  }, []);
-
-  const handleCloseDrawer = useCallback(() => {
-    setMobileDrawerOpen(false);
-  }, []);
-
-  // Auto-select first branch when filtered list changes
   useEffect(() => {
-    if (filteredBranches.length > 0) {
-      const needsSelection =
-        !selectedBranch ||
-        !filteredBranches.find((b) => b.id === selectedBranch.id) ||
-        prevSortByRef.current !== sortBy;
-
-      if (needsSelection) {
-        setSelectedBranch(filteredBranches[0]);
-      }
-
-      // Update ref for next comparison
-      prevSortByRef.current = sortBy;
-    } else {
+    if (filteredBranches.length === 0) {
       setSelectedBranch(null);
+      return;
     }
-  }, [filteredBranches, selectedBranch, sortBy]);
+
+    const sortChanged = prevSortByRef.current !== sortBy;
+    prevSortByRef.current = sortBy;
+
+    const currentIsGone = !filteredBranches.find(
+      (b) => b.id === selectedBranch?.id,
+    );
+
+    if (!selectedBranch || currentIsGone || sortChanged) {
+      setSelectedBranch(filteredBranches[0]);
+    }
+  }, [filteredBranches, sortBy]);
+
+  // ── Return ────────────────────────────────────────────────────────────────
 
   return {
-    // State
     branches,
     loading,
     error,
@@ -175,17 +187,12 @@ export function useAppData() {
     locating,
     selectedBranch,
     setSelectedBranch,
-    mobileTab,
-    setMobileTab,
     mobileDrawerOpen,
     setMobileDrawerOpen,
-    mobileDrawerBranch,
-    setMobileDrawerBranch,
-    // Computed
+    mobileDrawerBranchRef,
     filteredBranches,
     uniqueCities,
     uniqueCountries,
-    // Actions
     load,
     handleGeolocate,
     handleCityToggle,
