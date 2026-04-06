@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import type { ReactNode } from "react";
 import {
-  SEARCH_ICON,
-  CLEAR_ICON,
-  CHECK_ICON,
-  CHEVRON_ICON,
-  REMOVE_ICON,
-} from "../utils/selectHelpers";
+  SearchIcon,
+  XIcon,
+  CheckIcon,
+  ChevronDownIcon,
+} from "./icons/IconLibrary";
 
 interface SearchableSelectProps {
   options: string[];
@@ -40,14 +39,12 @@ const SearchableSelect = ({
   // --------------------------------------------------------------------------
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [focusedIndex, setFocusedIndex] = useState(-1);
 
   // --------------------------------------------------------------------------
   // REFS
   // --------------------------------------------------------------------------
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLUListElement>(null);
 
   // --------------------------------------------------------------------------
   // COMPUTED VALUES
@@ -79,7 +76,6 @@ const SearchableSelect = ({
         setIsOpen(false);
       }
       setSearchQuery("");
-      setFocusedIndex(-1);
     },
     [multiSelect, value, onChange],
   );
@@ -91,50 +87,6 @@ const SearchableSelect = ({
       }
     },
     [multiSelect, value, onChange],
-  );
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (!isOpen) {
-        if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter") {
-          setIsOpen(true);
-          return;
-        }
-      }
-
-      switch (e.key) {
-        case "ArrowDown":
-          e.preventDefault();
-          setFocusedIndex((prev) =>
-            prev < filteredOptions.length - 1 ? prev + 1 : prev,
-          );
-          break;
-        case "ArrowUp":
-          e.preventDefault();
-          setFocusedIndex((prev) => (prev > 0 ? prev - 1 : 0));
-          break;
-        case "Enter":
-          e.preventDefault();
-          if (focusedIndex >= 0 && filteredOptions[focusedIndex]) {
-            handleSelect(filteredOptions[focusedIndex]);
-          }
-          break;
-        case "Escape":
-          setIsOpen(false);
-          setSearchQuery("");
-          setFocusedIndex(-1);
-          break;
-        case "Home":
-          e.preventDefault();
-          setFocusedIndex(0);
-          break;
-        case "End":
-          e.preventDefault();
-          setFocusedIndex(filteredOptions.length - 1);
-          break;
-      }
-    },
-    [isOpen, filteredOptions, focusedIndex, handleSelect],
   );
 
   // --------------------------------------------------------------------------
@@ -155,18 +107,6 @@ const SearchableSelect = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    if (focusedIndex >= 0 && listRef.current) {
-      const items = listRef.current.children;
-      if (items[focusedIndex]) {
-        items[focusedIndex].scrollIntoView({
-          block: "nearest",
-          behavior: "smooth",
-        });
-      }
-    }
-  }, [focusedIndex]);
-
   // --------------------------------------------------------------------------
   // RENDER
   // --------------------------------------------------------------------------
@@ -175,8 +115,6 @@ const SearchableSelect = ({
       {/* Trigger */}
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
         role='combobox'
         aria-expanded={isOpen}
         aria-haspopup='listbox'
@@ -206,7 +144,7 @@ const SearchableSelect = ({
                     handleRemove(v);
                   }}
                   className='hover:bg-midnight hover:text-warmWhite rounded-full p-0.5 transition-colors'>
-                  {REMOVE_ICON}
+                  <XIcon size={12} />
                 </button>
               </span>
             ))}
@@ -224,7 +162,9 @@ const SearchableSelect = ({
         )}
 
         {/* Chevron icon - aligned to right */}
-        <span className='ml-auto shrink-0'>{CHEVRON_ICON(isOpen)}</span>
+        <span className={`ml-auto shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+          <ChevronDownIcon size={16} />
+        </span>
       </div>
 
       {/* Dropdown Menu */}
@@ -239,7 +179,7 @@ const SearchableSelect = ({
             <div className='relative'>
               {/* Search icon - positioned inside input on left */}
               <div className='absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate'>
-                {SEARCH_ICON}
+                <SearchIcon size={14} />
               </div>
 
               <input
@@ -257,7 +197,7 @@ const SearchableSelect = ({
                 <button
                   onClick={() => setSearchQuery("")}
                   className='absolute right-2 top-1/2 -translate-y-1/2 text-slate hover:text-midnight transition-colors p-0.5'>
-                  {CLEAR_ICON}
+                  <XIcon size={14} />
                 </button>
               )}
             </div>
@@ -265,7 +205,6 @@ const SearchableSelect = ({
 
           {/* Options List */}
           <ul
-            ref={listRef}
             role='listbox'
             className='max-h-60 overflow-y-auto py-1'>
             {filteredOptions.length === 0 ? (
@@ -273,7 +212,7 @@ const SearchableSelect = ({
                 No results found
               </li>
             ) : (
-              filteredOptions.map((option, index) => {
+              filteredOptions.map((option) => {
                 const isSelected = selectedValues.includes(option);
                 return (
                   <li
@@ -281,15 +220,14 @@ const SearchableSelect = ({
                     role='option'
                     aria-selected={isSelected}
                     onClick={() => handleSelect(option)}
-                    onMouseEnter={() => setFocusedIndex(index)}
-                    className={`px-3 py-2.5 cursor-pointer transition-colors ${
-                      focusedIndex === index ? "bg-cream" : "hover:bg-cream/50"
-                    } ${isSelected ? "bg-gold/10" : ""}`}>
+                    className={`px-3 py-2.5 cursor-pointer transition-colors hover:bg-cream/50 ${
+                      isSelected ? "bg-gold/10" : ""
+                    }`}>
                     <div className='flex items-center justify-between gap-2'>
                       <span className='flex-1 text-[13px] truncate'>
                         {option}
                       </span>
-                      {isSelected && CHECK_ICON}
+                      {isSelected && <CheckIcon size={14} className="text-gold" />}
                     </div>
                   </li>
                 );
