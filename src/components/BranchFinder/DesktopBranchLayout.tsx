@@ -14,11 +14,11 @@ interface DesktopBranchLayoutProps {
   };
   filterProps: {
     cities: string[];
-    activeCities: string[];
-    onCityToggle: (city: string) => void;
+    activeCity: string | null;
+    onCityChange: (city: string | null) => void;
     countries: string[];
-    activeCountries: string[];
-    onCountryToggle: (country: string) => void;
+    activeCountry: string | null;
+    onCountryChange: (country: string | null) => void;
   };
   searchProps: {
     value: string;
@@ -50,11 +50,11 @@ export function DesktopBranchLayout({
         onGeolocate={searchProps.onGeolocate}
         locating={searchProps.locating}
         cities={filterProps.cities}
-        activeCities={filterProps.activeCities}
-        onCityToggle={filterProps.onCityToggle}
+        activeCity={filterProps.activeCity}
+        onCityChange={filterProps.onCityChange}
         countries={filterProps.countries}
-        activeCountries={filterProps.activeCountries}
-        onCountryToggle={filterProps.onCountryToggle}
+        activeCountry={filterProps.activeCountry}
+        onCountryChange={filterProps.onCountryChange}
       />
 
       {/* Main content: map (fixed) + list (scrollable) */}
@@ -72,8 +72,8 @@ export function DesktopBranchLayout({
         </div>
 
         {/* Right: Branch List (scrollable) */}
-        <div className='flex-1 overflow-y-auto pr-1 min-w-0'>
-          <div className='mb-4'>
+        <div className='flex-1  pr-1 min-w-0'>
+          <div className='mb-2'>
             <BranchCountHeader
               count={mapProps.branches.length}
               total={branchCountProps.total}
@@ -84,7 +84,9 @@ export function DesktopBranchLayout({
               onSortDirectionChange={branchCountProps.onSortDirectionChange}
             />
           </div>
-          <div className='space-y-2'>{listContent}</div>
+          <div className='space-y-2 overflow-y-auto max-h-[93%] rounded-lg'>
+            {listContent}
+          </div>
         </div>
       </div>
     </div>

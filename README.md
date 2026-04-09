@@ -56,10 +56,10 @@ src/
 │   ├── shared/                 # ContactInfo, DistanceBadge
 │   ├── BranchCard.tsx          # Expandable branch row
 │   ├── BranchDrawer.tsx        # Mobile detail drawer
-│   ├── FilterBar.tsx           # City + country filters
+│   ├── FilterBar.tsx           # Country + city filters (single-select)
 │   ├── MapView.tsx             # Leaflet map
 │   ├── SearchBar.tsx           # Debounced search + geolocation
-│   ├── SearchableSelect.tsx    # Multi-select dropdown
+│   ├── SearchableSelect.tsx    # Single/multi-select dropdown
 │   └── SkeletonCards.tsx       # Loading skeletons
 ├── hooks/
 │   └── useAppData.ts           # Centralised state hook
@@ -83,7 +83,8 @@ Fetches all branches from Optimizely Graph in a single request and normalises th
 ### Search & filtering
 
 - 280ms debounced text search across name, city, address and postcode
-- Multi-select city and country filters
+- Single-select country and city filters (Country dropdown appears before City)
+- City options filter based on selected country
 - Sort by name, city, or distance (distance only available after geolocation)
 - All filtering runs in the browser via `useMemo` — no extra API calls
 

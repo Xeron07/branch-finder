@@ -57,7 +57,7 @@ const SearchableSelect = ({
   }, [options, searchQuery]);
 
   const selectedValues = Array.isArray(value) ? value : value ? [value] : [];
-  const displayValue = multiSelect ? "" : selectedValues[0] || "";
+  const displayValue = multiSelect ? "" : value || "";
 
   // --------------------------------------------------------------------------
   // HANDLERS
@@ -124,7 +124,7 @@ const SearchableSelect = ({
             : "border-transparent shadow-sm hover:border-midnight/20 focus-within:border-gold"
         }`}>
         {icon && <span className='shrink-0 text-midnight'>{icon}</span>}
-        {label && (
+        {label && !value && (
           <span className='text-[12px] text-midnight whitespace-nowrap'>
             {label}
           </span>
@@ -157,12 +157,13 @@ const SearchableSelect = ({
         )}
 
         {/* Single select value display */}
-        {!multiSelect && (
+        {!multiSelect && !!displayValue && (
           <span className='flex-1 truncate'>{displayValue || placeholder}</span>
         )}
 
         {/* Chevron icon - aligned to right */}
-        <span className={`ml-auto shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+        <span
+          className={`ml-auto shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
           <ChevronDownIcon size={16} />
         </span>
       </div>
@@ -204,9 +205,7 @@ const SearchableSelect = ({
           </div>
 
           {/* Options List */}
-          <ul
-            role='listbox'
-            className='max-h-60 overflow-y-auto py-1'>
+          <ul role='listbox' className='max-h-60 overflow-y-auto py-1'>
             {filteredOptions.length === 0 ? (
               <li className='px-3 py-4 text-center text-[13px] text-slate italic'>
                 No results found
@@ -227,7 +226,9 @@ const SearchableSelect = ({
                       <span className='flex-1 text-[13px] truncate'>
                         {option}
                       </span>
-                      {isSelected && <CheckIcon size={14} className="text-gold" />}
+                      {isSelected && (
+                        <CheckIcon size={14} className='text-gold' />
+                      )}
                     </div>
                   </li>
                 );

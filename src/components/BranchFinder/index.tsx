@@ -59,12 +59,12 @@ const BranchFinder = () => {
       userLocation: appData.userLocation,
     },
     filterProps: {
-      cities: appData.uniqueCities,
-      activeCities: appData.activeCities,
-      onCityToggle: appData.handleCityToggle,
+      cities: appData.availableCities,
+      activeCity: appData.activeCity,
+      onCityChange: appData.handleCityChange,
       countries: appData.uniqueCountries,
-      activeCountries: appData.activeCountries,
-      onCountryToggle: appData.handleCountryToggle,
+      activeCountry: appData.activeCountry,
+      onCountryChange: appData.handleCountryChange,
     },
     searchProps: {
       value: appData.query,
@@ -84,12 +84,12 @@ const BranchFinder = () => {
   const mobileLayoutProps = {
     listContent: mobileListContent,
     filterProps: {
-      cities: appData.uniqueCities,
-      activeCities: appData.activeCities,
-      onCityToggle: appData.handleCityToggle,
+      cities: appData.availableCities,
+      activeCity: appData.activeCity,
+      onCityChange: appData.handleCityChange,
       countries: appData.uniqueCountries,
-      activeCountries: appData.activeCountries,
-      onCountryToggle: appData.handleCountryToggle,
+      activeCountry: appData.activeCountry,
+      onCountryChange: appData.handleCountryChange,
     },
     branchCountProps: {
       total: appData.branches.length,

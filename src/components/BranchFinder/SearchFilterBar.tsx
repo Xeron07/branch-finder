@@ -7,11 +7,11 @@ interface SearchFilterBarProps {
   onGeolocate: () => void;
   locating: boolean;
   cities: string[];
-  activeCities: string[];
-  onCityToggle: (city: string) => void;
+  activeCity: string | null;
+  onCityChange: (city: string | null) => void;
   countries: string[];
-  activeCountries: string[];
-  onCountryToggle: (country: string) => void;
+  activeCountry: string | null;
+  onCountryChange: (country: string | null) => void;
 }
 
 export function SearchFilterBar({
@@ -20,11 +20,11 @@ export function SearchFilterBar({
   onGeolocate,
   locating,
   cities,
-  activeCities,
-  onCityToggle,
+  activeCity,
+  onCityChange,
   countries,
-  activeCountries,
-  onCountryToggle,
+  activeCountry,
+  onCountryChange,
 }: SearchFilterBarProps) {
   return (
     <div className='relative z-30 bg-cream rounded-2xl -mt-16 shadow-[0_2px_12px_rgba(10,22,40,0.08)] sm:shadow p-3 gap-8 flex justify-between items-center'>
@@ -42,11 +42,11 @@ export function SearchFilterBar({
       <div className='w-full flex-1 flex pr-2.5'>
         <FilterBar
           cities={cities}
-          activeCities={activeCities}
-          onCityToggle={onCityToggle}
+          activeCity={activeCity}
+          onCityChange={onCityChange}
           countries={countries}
-          activeCountries={activeCountries}
-          onCountryToggle={onCountryToggle}
+          activeCountry={activeCountry}
+          onCountryChange={onCountryChange}
         />
       </div>
     </div>

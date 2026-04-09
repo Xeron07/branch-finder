@@ -7,11 +7,11 @@ interface MobileBranchLayoutProps {
   listContent: ReactNode;
   filterProps: {
     cities: string[];
-    activeCities: string[];
-    onCityToggle: (city: string) => void;
+    activeCity: string | null;
+    onCityChange: (city: string | null) => void;
     countries: string[];
-    activeCountries: string[];
-    onCountryToggle: (country: string) => void;
+    activeCountry: string | null;
+    onCountryChange: (country: string | null) => void;
   };
   branchCountProps: {
     total: number;
@@ -35,11 +35,11 @@ export function MobileBranchLayout({
       <div className='sticky top-0 z-30 bg-white shadow-[0_2px_12px_rgba(10,22,40,0.08)] px-4 py-3'>
         <FilterBar
           cities={filterProps.cities}
-          activeCities={filterProps.activeCities}
-          onCityToggle={filterProps.onCityToggle}
+          activeCity={filterProps.activeCity}
+          onCityChange={filterProps.onCityChange}
           countries={filterProps.countries}
-          activeCountries={filterProps.activeCountries}
-          onCountryToggle={filterProps.onCountryToggle}
+          activeCountry={filterProps.activeCountry}
+          onCountryChange={filterProps.onCountryChange}
         />
       </div>
 

@@ -7,8 +7,8 @@ export function useAppData() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState<string>("");
-  const [activeCities, setActiveCities] = useState<string[]>([]);
-  const [activeCountries, setActiveCountries] = useState<string[]>([]);
+  const [activeCity, setActiveCity] = useState<string | null>(null);
+  const [activeCountry, setActiveCountry] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>("name");
   const [sortDescending, setSortDescending] = useState<boolean>(false);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
@@ -59,24 +59,27 @@ export function useAppData() {
 
   // ── Filter actions ────────────────────────────────────────────────────────
 
-  const handleCityToggle = (city: string) => {
-    setActiveCities((prev) =>
-      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city],
-    );
+  const handleCityChange = (city: string | null) => {
+    setActiveCity(city);
   };
 
-  const handleCountryToggle = (country: string) => {
-    setActiveCountries((prev) =>
-      prev.includes(country)
-        ? prev.filter((c) => c !== country)
-        : [...prev, country],
-    );
+  const handleCountryChange = (country: string | null) => {
+    setActiveCountry(country);
+    // Reset city if it's not in the selected country's cities
+    if (country && activeCity) {
+      const citiesInCountry = branches
+        .filter((b) => b.country === country)
+        .map((b) => b.city);
+      if (!citiesInCountry.includes(activeCity)) {
+        setActiveCity(null);
+      }
+    }
   };
 
   const clearAll = () => {
     setQuery("");
-    setActiveCities([]);
-    setActiveCountries([]);
+    setActiveCity(null);
+    setActiveCountry(null);
   };
 
   // ── Drawer ────────────────────────────────────────────────────────────────
@@ -104,12 +107,12 @@ export function useAppData() {
           : null,
     }));
 
-    if (activeCities.length > 0) {
-      result = result.filter((b) => activeCities.includes(b.city));
+    if (activeCity) {
+      result = result.filter((b) => b.city === activeCity);
     }
 
-    if (activeCountries.length > 0) {
-      result = result.filter((b) => activeCountries.includes(b.country));
+    if (activeCountry) {
+      result = result.filter((b) => b.country === activeCountry);
     }
 
     result.sort((a, b) => {
@@ -128,8 +131,8 @@ export function useAppData() {
   }, [
     branches,
     query,
-    activeCities,
-    activeCountries,
+    activeCity,
+    activeCountry,
     sortBy,
     sortDescending,
     userLocation,
@@ -148,6 +151,34 @@ export function useAppData() {
       ).sort(),
     [branches],
   );
+
+  // Create city-country mapping for dependent filtering
+  const citiesByCountry = useMemo(() => {
+    const mapping: Record<string, string[]> = {};
+    branches.forEach((branch) => {
+      if (branch.country && branch.city) {
+        if (!mapping[branch.country]) {
+          mapping[branch.country] = [];
+        }
+        if (!mapping[branch.country].includes(branch.city)) {
+          mapping[branch.country].push(branch.city);
+        }
+      }
+    });
+    // Sort cities in each country
+    Object.keys(mapping).forEach((country) => {
+      mapping[country].sort();
+    });
+    return mapping;
+  }, [branches]);
+
+  // Get available cities based on selected country (or all cities if no country selected)
+  const availableCities = useMemo(() => {
+    if (activeCountry) {
+      return citiesByCountry[activeCountry] || [];
+    }
+    return uniqueCities;
+  }, [activeCountry, citiesByCountry, uniqueCities]);
 
   // ── Auto-select first branch ──────────────────────────────────────────────
 
@@ -177,8 +208,8 @@ export function useAppData() {
     error,
     query,
     setQuery,
-    activeCities,
-    activeCountries,
+    activeCity,
+    activeCountry,
     sortBy,
     setSortBy,
     sortDescending,
@@ -193,10 +224,11 @@ export function useAppData() {
     filteredBranches,
     uniqueCities,
     uniqueCountries,
+    availableCities,
     load,
     handleGeolocate,
-    handleCityToggle,
-    handleCountryToggle,
+    handleCityChange,
+    handleCountryChange,
     clearAll,
     handleMobileMapSelect,
     handleOpenDrawer,

@@ -21,7 +21,7 @@ const LoadingFallback = () => (
 
 export default function App() {
   return (
-    <div className='min-h-screen bg-warmWhite flex flex-col'>
+    <div className='min-h-screen bg-cream flex flex-col'>
       <Suspense fallback={<LoadingFallback />}>
         <Navbar />
         <BranchFinder />
