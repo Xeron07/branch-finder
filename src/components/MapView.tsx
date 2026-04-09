@@ -146,8 +146,6 @@ const MapView = ({
         .addTo(map)
         .bindPopup("You are here");
 
-      // Only center map on user location if no branch is selected
-      // This prevents overriding the map center when a branch is auto-selected after geolocation
       if (!selectedBranch) {
         map.setView([userLocation.lat, userLocation.lng], 12, { animate: true });
       }

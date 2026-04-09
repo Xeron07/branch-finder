@@ -21,6 +21,7 @@ interface MobileBranchLayoutProps {
     onSortDirectionChange: (descending: boolean) => void;
   };
   filteredBranchesCount: number;
+  scrollContainerRef?: React.RefObject<HTMLDivElement>;
 }
 
 export function MobileBranchLayout({
@@ -28,6 +29,7 @@ export function MobileBranchLayout({
   filterProps,
   branchCountProps,
   filteredBranchesCount,
+  scrollContainerRef,
 }: MobileBranchLayoutProps) {
   return (
     <div className='flex flex-col flex-1 relative bg-warmWhite'>
@@ -61,7 +63,7 @@ export function MobileBranchLayout({
         )}
 
         {/* Branch list */}
-        <div className='flex-1 px-1 sm:px-4 pb-24 space-y-2 overflow-y-auto'>
+        <div ref={scrollContainerRef} className='flex-1 px-1 sm:px-4 pb-24 space-y-2 overflow-y-auto'>
           {listContent}
         </div>
       </div>

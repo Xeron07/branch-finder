@@ -34,6 +34,11 @@ export interface UserLocation {
 export type SortBy = 'name' | 'city' | 'distance';
 
 /**
+ * Source of branch selection (map, list, or drawer)
+ */
+export type SelectionSource = 'map' | 'list' | 'drawer';
+
+/**
  * City filter state
  */
 export type CityFilter = string[];

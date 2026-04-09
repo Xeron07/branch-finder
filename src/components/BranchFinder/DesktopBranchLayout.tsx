@@ -33,6 +33,7 @@ interface DesktopBranchLayoutProps {
     onSortByChange: (sortBy: SortBy) => void;
     onSortDirectionChange: (descending: boolean) => void;
   };
+  scrollContainerRef?: React.RefObject<HTMLDivElement>;
 }
 
 export function DesktopBranchLayout({
@@ -41,6 +42,7 @@ export function DesktopBranchLayout({
   filterProps,
   searchProps,
   branchCountProps,
+  scrollContainerRef,
 }: DesktopBranchLayoutProps) {
   return (
     <div className='max-w-7xl md:flex flex-col flex-1 w-full mx-auto px-6 py-6 gap-4'>
@@ -84,7 +86,7 @@ export function DesktopBranchLayout({
               onSortDirectionChange={branchCountProps.onSortDirectionChange}
             />
           </div>
-          <div className='space-y-2 overflow-y-auto max-h-[93%] rounded-lg'>
+          <div ref={scrollContainerRef} className='space-y-2 overflow-y-auto max-h-[93%] rounded-lg'>
             {listContent}
           </div>
         </div>

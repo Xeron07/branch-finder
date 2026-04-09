@@ -5,6 +5,9 @@ import { MobileBranchLayout } from "./MobileBranchLayout";
 import { ErrorState } from "./ErrorState";
 import BranchDrawer from "../BranchDrawer";
 import { useAppData } from "../../hooks/useAppData";
+import type { Branch } from "../../types";
+import type { SelectionSource } from "../../types";
+import { useState, useRef } from "react";
 
 // ============================================================================
 // BRANCH FINDER COMPONENT
@@ -12,6 +15,25 @@ import { useAppData } from "../../hooks/useAppData";
 
 const BranchFinder = () => {
   const appData = useAppData();
+
+  // Track where the selection came from (map, list, or drawer)
+  const [selectionSource, setSelectionSource] = useState<SelectionSource | undefined>();
+
+  // Refs for scroll containers
+  const desktopScrollRef = useRef<HTMLDivElement>(null);
+  const mobileScrollRef = useRef<HTMLDivElement>(null);
+
+  // Handler for list-based selection (no scroll)
+  const handleListSelect = (b: Branch) => {
+    setSelectionSource('list');
+    appData.setSelectedBranch((prev) => (prev?.id === b.id ? null : b));
+  };
+
+  // Handler for map-based selection (with scroll)
+  const handleMapSelect = (b: Branch) => {
+    setSelectionSource('map');
+    appData.setSelectedBranch(b);
+  };
 
   // --------------------------------------------------------------------------
   // LIST CONTENT RENDERERS
@@ -23,11 +45,11 @@ const BranchFinder = () => {
       branches={appData.filteredBranches}
       query={appData.query}
       onClear={appData.clearAll}
-      onBranchSelect={(b) =>
-        appData.setSelectedBranch((prev) => (prev?.id === b.id ? null : b))
-      }
+      onBranchSelect={handleListSelect}
       selectedBranch={appData.selectedBranch}
       mobileMode={false}
+      selectionSource={selectionSource}
+      scrollContainerRef={desktopScrollRef}
     />
   );
 
@@ -37,12 +59,12 @@ const BranchFinder = () => {
       branches={appData.filteredBranches}
       query={appData.query}
       onClear={appData.clearAll}
-      onBranchSelect={(b) =>
-        appData.setSelectedBranch((prev) => (prev?.id === b.id ? null : b))
-      }
+      onBranchSelect={handleListSelect}
       selectedBranch={appData.selectedBranch}
       mobileMode={true}
       onOpenDrawer={appData.handleOpenDrawer}
+      selectionSource={selectionSource}
+      scrollContainerRef={mobileScrollRef}
     />
   );
 
@@ -55,7 +77,7 @@ const BranchFinder = () => {
     mapProps: {
       branches: appData.filteredBranches,
       selectedBranch: appData.selectedBranch,
-      onSelectBranch: appData.setSelectedBranch,
+      onSelectBranch: handleMapSelect,
       userLocation: appData.userLocation,
     },
     filterProps: {
@@ -79,6 +101,7 @@ const BranchFinder = () => {
       onSortByChange: appData.setSortBy,
       onSortDirectionChange: appData.setSortDescending,
     },
+    scrollContainerRef: desktopScrollRef,
   };
 
   const mobileLayoutProps = {
@@ -99,6 +122,7 @@ const BranchFinder = () => {
       onSortDirectionChange: appData.setSortDescending,
     },
     filteredBranchesCount: appData.filteredBranches.length,
+    scrollContainerRef: mobileScrollRef,
   };
 
   // --------------------------------------------------------------------------

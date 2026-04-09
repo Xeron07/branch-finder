@@ -93,10 +93,7 @@ export function useAppData() {
     setMobileDrawerOpen(true);
   }, []);
 
-  const handleCloseDrawer = useCallback(
-    () => setMobileDrawerOpen(false),
-    [],
-  );
+  const handleCloseDrawer = useCallback(() => setMobileDrawerOpen(false), []);
 
   const handleMobileMapSelect = useCallback(
     (b: Branch) => setSelectedBranch(b),
@@ -253,6 +250,7 @@ export function useAppData() {
       userLocation,
       locating,
       selectedBranch,
+      setSelectedBranch,
       mobileDrawerOpen,
       filteredBranches,
       uniqueCities,
