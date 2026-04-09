@@ -60,10 +60,10 @@ export function DesktopBranchLayout({
       />
 
       {/* Main content: map (fixed) + list (scrollable) */}
-      <div className='flex gap-6 h-[calc(100vh-12rem)]'>
+      <div className='flex gap-6 h-[calc(100vh-18rem)]'>
         {/* Left: Map (fixed) */}
         <div className='w-[55%] sm:w-[60.5%] shrink-0'>
-          <div className='sticky top-0 h-[calc(100vh-12rem)] rounded-3xl overflow-hidden shadow-[0_4px_20px_rgba(10,22,40,0.12)]'>
+          <div className='sticky top-0 h-[calc(100vh-18rem)] rounded-3xl overflow-hidden shadow-[0_4px_20px_rgba(10,22,40,0.12)]'>
             <MapView
               branches={mapProps.branches}
               selectedBranch={mapProps.selectedBranch}
@@ -86,7 +86,9 @@ export function DesktopBranchLayout({
               onSortDirectionChange={branchCountProps.onSortDirectionChange}
             />
           </div>
-          <div ref={scrollContainerRef} className='space-y-2 overflow-y-auto max-h-[93%] rounded-lg'>
+          <div
+            ref={scrollContainerRef}
+            className='space-y-2 overflow-y-auto max-h-[93%] rounded-lg'>
             {listContent}
           </div>
         </div>
