@@ -36,8 +36,10 @@ export default function FilterBar({
           options={countryOptions}
           value={activeCountry || ""}
           onChange={(newValue) => {
-            const finalValue = newValue === "All" ? null : (newValue || null);
-            onCountryChange(finalValue);
+            const finalValue = newValue === "All" ? null : newValue || null;
+            onCountryChange(
+              Array.isArray(finalValue) ? finalValue[0] : finalValue,
+            );
           }}
           placeholder='All countries'
           label='Country'
@@ -53,8 +55,10 @@ export default function FilterBar({
           options={cityOptions}
           value={activeCity || ""}
           onChange={(newValue) => {
-            const finalValue = newValue === "All" ? null : (newValue || null);
-            onCityChange(finalValue);
+            const finalValue = newValue === "All" ? null : newValue || null;
+            onCityChange(
+              Array.isArray(finalValue) ? finalValue[0] : finalValue,
+            );
           }}
           placeholder='All cities'
           label='City'
