@@ -2,7 +2,7 @@
 
 A responsive branch finder built for the Optimizely Demo Engineer technical assessment.
 
-**Live demo:** [your-deployment-url]  
+**Live demo:** [Click here](https://roaring-hamster-7df42b.netlify.app/)  
 **Stack:** React 18 · TypeScript · Vite · Tailwind CSS · Leaflet.js · Optimizely Graph
 
 ---
