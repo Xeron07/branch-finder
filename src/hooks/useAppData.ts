@@ -40,7 +40,7 @@ export function useAppData() {
 
   // ── Geolocation ───────────────────────────────────────────────────────────
 
-  const handleGeolocate = () => {
+  const handleGeolocate = useCallback(() => {
     if (!navigator.geolocation) return;
     setLocating(true);
     navigator.geolocation.getCurrentPosition(
@@ -55,44 +55,53 @@ export function useAppData() {
       () => setLocating(false),
       { timeout: 10000 },
     );
-  };
+  }, []);
 
   // ── Filter actions ────────────────────────────────────────────────────────
 
-  const handleCityChange = (city: string | null) => {
+  const handleCityChange = useCallback((city: string | null) => {
     setActiveCity(city);
-  };
+  }, []);
 
-  const handleCountryChange = (country: string | null) => {
-    setActiveCountry(country);
-    // Reset city if it's not in the selected country's cities
-    if (country && activeCity) {
-      const citiesInCountry = branches
-        .filter((b) => b.country === country)
-        .map((b) => b.city);
-      if (!citiesInCountry.includes(activeCity)) {
-        setActiveCity(null);
+  const handleCountryChange = useCallback(
+    (country: string | null) => {
+      setActiveCountry(country);
+      if (country) {
+        setActiveCity((prevCity) => {
+          if (!prevCity) return null;
+          const citiesInCountry = branches
+            .filter((b) => b.country === country)
+            .map((b) => b.city);
+          return citiesInCountry.includes(prevCity) ? prevCity : null;
+        });
       }
-    }
-  };
+    },
+    [branches],
+  );
 
-  const clearAll = () => {
+  const clearAll = useCallback(() => {
     setQuery("");
     setActiveCity(null);
     setActiveCountry(null);
-  };
+  }, []);
 
   // ── Drawer ────────────────────────────────────────────────────────────────
 
-  const handleOpenDrawer = (branch: Branch) => {
+  const handleOpenDrawer = useCallback((branch: Branch) => {
     mobileDrawerBranchRef.current = branch;
     setSelectedBranch(branch);
     setMobileDrawerOpen(true);
-  };
+  }, []);
 
-  const handleCloseDrawer = () => setMobileDrawerOpen(false);
+  const handleCloseDrawer = useCallback(
+    () => setMobileDrawerOpen(false),
+    [],
+  );
 
-  const handleMobileMapSelect = (b: Branch) => setSelectedBranch(b);
+  const handleMobileMapSelect = useCallback(
+    (b: Branch) => setSelectedBranch(b),
+    [],
+  );
 
   // ── Derived data ──────────────────────────────────────────────────────────
 
@@ -152,7 +161,6 @@ export function useAppData() {
     [branches],
   );
 
-  // Create city-country mapping for dependent filtering
   const citiesByCountry = useMemo(() => {
     const mapping: Record<string, string[]> = {};
     branches.forEach((branch) => {
@@ -165,14 +173,12 @@ export function useAppData() {
         }
       }
     });
-    // Sort cities in each country
     Object.keys(mapping).forEach((country) => {
       mapping[country].sort();
     });
     return mapping;
   }, [branches]);
 
-  // Get available cities based on selected country (or all cities if no country selected)
   const availableCities = useMemo(() => {
     if (activeCountry) {
       return citiesByCountry[activeCountry] || [];
@@ -202,36 +208,64 @@ export function useAppData() {
 
   // ── Return ────────────────────────────────────────────────────────────────
 
-  return {
-    branches,
-    loading,
-    error,
-    query,
-    setQuery,
-    activeCity,
-    activeCountry,
-    sortBy,
-    setSortBy,
-    sortDescending,
-    setSortDescending,
-    userLocation,
-    locating,
-    selectedBranch,
-    setSelectedBranch,
-    mobileDrawerOpen,
-    setMobileDrawerOpen,
-    mobileDrawerBranchRef,
-    filteredBranches,
-    uniqueCities,
-    uniqueCountries,
-    availableCities,
-    load,
-    handleGeolocate,
-    handleCityChange,
-    handleCountryChange,
-    clearAll,
-    handleMobileMapSelect,
-    handleOpenDrawer,
-    handleCloseDrawer,
-  };
+  return useMemo(
+    () => ({
+      branches,
+      loading,
+      error,
+      query,
+      setQuery,
+      activeCity,
+      activeCountry,
+      sortBy,
+      setSortBy,
+      sortDescending,
+      setSortDescending,
+      userLocation,
+      locating,
+      selectedBranch,
+      setSelectedBranch,
+      mobileDrawerOpen,
+      setMobileDrawerOpen,
+      mobileDrawerBranchRef,
+      filteredBranches,
+      uniqueCities,
+      uniqueCountries,
+      availableCities,
+      load,
+      handleGeolocate,
+      handleCityChange,
+      handleCountryChange,
+      clearAll,
+      handleMobileMapSelect,
+      handleOpenDrawer,
+      handleCloseDrawer,
+    }),
+    [
+      branches,
+      loading,
+      error,
+      query,
+      activeCity,
+      activeCountry,
+      sortBy,
+      sortDescending,
+      userLocation,
+      locating,
+      selectedBranch,
+      mobileDrawerOpen,
+      filteredBranches,
+      uniqueCities,
+      uniqueCountries,
+      availableCities,
+      load,
+      handleGeolocate,
+      handleCityChange,
+      handleCountryChange,
+      clearAll,
+      handleMobileMapSelect,
+      handleOpenDrawer,
+      handleCloseDrawer,
+    ],
+  );
 }
