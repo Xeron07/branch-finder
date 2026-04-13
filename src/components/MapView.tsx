@@ -1,17 +1,12 @@
 import { useEffect, useRef, useCallback } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import type { Branch, UserLocation } from "../types";
 import {
   initializeMap,
   createBranchMarker,
   createUserIcon,
 } from "../utils/mapHelpers";
-
-// Extend Window interface to include Leaflet
-declare global {
-  interface Window {
-    L: any;
-  }
-}
 
 interface MapViewProps {
   branches: Branch[];
@@ -34,27 +29,25 @@ const MapView = ({
   // REFS
   // --------------------------------------------------------------------------
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
-  const userMarkerRef = useRef<any>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
+  const userMarkerRef = useRef<L.Marker | null>(null);
 
   // --------------------------------------------------------------------------
   // MAP INITIALIZATION HANDLER
   // --------------------------------------------------------------------------
   const handleMapInitialization = useCallback(() => {
-    if (!window.L || mapInstanceRef.current || !mapRef.current) return;
+    // Guard: already initialized or DOM element not ready
+    if (mapInstanceRef.current || !mapRef.current) return;
 
-    const map = initializeMap(mapRef.current);
-    if (map) {
-      mapInstanceRef.current = map;
-    }
+    mapInstanceRef.current = initializeMap(mapRef.current);
   }, []);
 
   // --------------------------------------------------------------------------
   // MARKERS UPDATE HANDLER
   // --------------------------------------------------------------------------
   const updateMarkers = useCallback(() => {
-    if (!window.L || !mapInstanceRef.current) return;
+    if (!mapInstanceRef.current) return;
 
     const map = mapInstanceRef.current;
 
@@ -62,7 +55,7 @@ const MapView = ({
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    // Filter valid branches
+    // Filter branches that have valid coordinates
     const validBranches = branches.filter((b) => b.lat && b.lng);
     if (!validBranches.length) return;
 
@@ -76,18 +69,17 @@ const MapView = ({
         onSelectBranch,
       );
 
-      if (marker) {
-        // Pan to selected branch
-        if (isSelected) {
-          map.setView([branch.lat!, branch.lng!], 14, { animate: true });
-        }
-        markersRef.current.push(marker);
+      // Pan to selected branch
+      if (isSelected) {
+        map.setView([branch.lat!, branch.lng!], 14, { animate: true });
       }
+
+      markersRef.current.push(marker);
     });
 
-    // Fit bounds on first load (if no branch is selected)
+    // Fit all markers in view on first load when nothing is selected
     if (!selectedBranch && validBranches.length > 0) {
-      const group = window.L.featureGroup(markersRef.current);
+      const group = L.featureGroup(markersRef.current);
       map.fitBounds(group.getBounds().pad(0.1));
     }
   }, [branches, selectedBranch, onSelectBranch]);
@@ -96,12 +88,12 @@ const MapView = ({
   // PAN TO SELECTED BRANCH HANDLER
   // --------------------------------------------------------------------------
   const panToSelectedBranch = useCallback(() => {
-    if (!window.L || !mapInstanceRef.current || !selectedBranch) return;
+    if (!mapInstanceRef.current || !selectedBranch) return;
 
     const map = mapInstanceRef.current;
 
     if (selectedBranch.lat && selectedBranch.lng) {
-      // Find and open popup for the selected branch marker
+      // Find matching marker by lat/lng and open its popup
       const marker = markersRef.current.find((m) => {
         const latLng = m.getLatLng();
         return (
@@ -113,7 +105,6 @@ const MapView = ({
         marker.openPopup();
       }
 
-      // Pan to the selected branch
       map.setView([selectedBranch.lat, selectedBranch.lng], 14, {
         animate: true,
       });
@@ -124,7 +115,7 @@ const MapView = ({
   // USER LOCATION MARKER HANDLER
   // --------------------------------------------------------------------------
   const updateUserLocationMarker = useCallback(() => {
-    if (!window.L || !mapInstanceRef.current || !userLocation) return;
+    if (!mapInstanceRef.current || !userLocation) return;
 
     const map = mapInstanceRef.current;
 
@@ -133,22 +124,17 @@ const MapView = ({
       userMarkerRef.current.remove();
     }
 
-    // Create and add new user marker
-    const userIcon = createUserIcon();
-    if (userIcon) {
-      userMarkerRef.current = window.L.marker(
-        [userLocation.lat, userLocation.lng],
-        {
-          icon: userIcon,
-          zIndexOffset: 1000,
-        },
-      )
-        .addTo(map)
-        .bindPopup("You are here");
+    // Create and place new user location marker
+    userMarkerRef.current = L.marker([userLocation.lat, userLocation.lng], {
+      icon: createUserIcon(),
+      zIndexOffset: 1000,
+    })
+      .addTo(map)
+      .bindPopup("You are here");
 
-      if (!selectedBranch) {
-        map.setView([userLocation.lat, userLocation.lng], 12, { animate: true });
-      }
+    // Only pan to user if no branch is selected
+    if (!selectedBranch) {
+      map.setView([userLocation.lat, userLocation.lng], 12, { animate: true });
     }
   }, [userLocation, selectedBranch]);
 
@@ -170,6 +156,18 @@ const MapView = ({
   useEffect(() => {
     updateUserLocationMarker();
   }, [updateUserLocationMarker]);
+
+  // --------------------------------------------------------------------------
+  // CLEANUP — destroy map on unmount to prevent memory leaks
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   // --------------------------------------------------------------------------
   // RENDER
