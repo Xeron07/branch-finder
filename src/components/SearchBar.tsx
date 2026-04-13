@@ -1,5 +1,10 @@
-import { useState, useRef } from "react";
-import { SearchIcon, CloseIcon, MapPinIcon } from "../components/icons/IconLibrary";
+import { useState, useRef, useEffect } from "react";
+import {
+  SearchIcon,
+  CloseIcon,
+  MapPinIcon,
+} from "../components/icons/IconLibrary";
+import useDebounce from "../hooks/useDebounce";
 
 interface SearchBarProps {
   value: string;
@@ -15,10 +20,25 @@ export default function SearchBar({
   locating,
 }: SearchBarProps) {
   const [focused, setFocused] = useState(false);
+  const [localValue, setLocalValue] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Debounce the search input with 280ms delay
+  const debouncedValue = useDebounce(localValue, 280);
+
+  // Update parent when debounced value changes
+  useEffect(() => {
+    onChange(debouncedValue);
+    //eslint-disable-next-line
+  }, [debouncedValue]);
+
+  // Update local value when prop changes (e.g., when cleared from parent)
+  // useEffect(() => {
+  //   setLocalValue(value);
+  // }, [value]);
+
   const handleClear = () => {
-    onChange("");
+    setLocalValue("");
     inputRef.current?.focus();
   };
 
@@ -30,13 +50,16 @@ export default function SearchBar({
           : "shadow-[0_2px_8px_rgba(10,22,40,0.08)] hover:shadow-[0_4px_16px_rgba(10,22,40,0.12)]"
       }`}>
       {/* Search icon - inside the field */}
-      <SearchIcon size={16} className="text-slate shrink-0 pointer-events-none" />
+      <SearchIcon
+        size={16}
+        className='text-slate shrink-0 pointer-events-none'
+      />
 
       <input
         ref={inputRef}
         type='text'
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        value={localValue}
+        onChange={(e) => setLocalValue(e.target.value)}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
         placeholder='Search by branch name, city or postcode…'
@@ -44,7 +67,7 @@ export default function SearchBar({
       />
 
       {/* Clear button - inside the field */}
-      {value && (
+      {localValue && (
         <button
           onClick={handleClear}
           className='shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-cream/80 text-slate hover:bg-midnight hover:text-warmWhite transition-all duration-200 active:scale-95'>
